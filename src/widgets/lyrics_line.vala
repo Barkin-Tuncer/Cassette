@@ -24,11 +24,11 @@ namespace Cassette {
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/lyrics_line.ui")]
     public class LyricsLine : Adw.Bin {   
         [GtkChild]
-        unowned Gtk.Revealer line_small;     
+        private unowned Gtk.Revealer line_small;     
         [GtkChild]
-        unowned Gtk.Label line_big_label;   
+        private unowned Gtk.Label line_big_label;   
         [GtkChild]
-        unowned Gtk.Label line_small_label;  
+        private unowned Gtk.Label line_small_label;  
 
         public bool is_big {
             get {
@@ -45,11 +45,11 @@ namespace Cassette {
         public string line { get; construct set; }
         public int64 time_ms { get; construct set; default = -1; }
 
-        int64 next_time;
-        uint diff_con = -1;
+        private int64 next_time;
+        private uint diff_con = -1;
 
-        Gtk.GestureClick? gesture_click = null;
-        Gtk.EventControllerMotion? event_motion = null;
+        private Gtk.GestureClick? gesture_click = null;
+        private Gtk.EventControllerMotion? event_motion = null;
 
         public LyricsLine.text (string line) {
             Object (line: line);

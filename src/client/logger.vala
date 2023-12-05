@@ -54,11 +54,7 @@ namespace CassetteClient {
             }
         }
 
-        static void write_to_file (string log_level_str, string message) {
-            if (instance == null) {
-                return;
-            }
-
+        private static void write_to_file (string log_level_str, string message) {
             if (instance.log_file == null) {
                 return;
             }
@@ -73,15 +69,11 @@ namespace CassetteClient {
             }
         }
 
-        static void write_net_to_file (string direction, string data) {
-            if (instance == null) {
-                return;
-            }
-
+        private static void write_net_to_file (string direction, string data) {
             if (instance.log_file == null) {
                 return;
             }
-
+            
             try {
                 FileOutputStream os = instance.log_file.append_to (FileCreateFlags.NONE);
                 string final_message = direction + " : " + data + "\n";
@@ -92,24 +84,16 @@ namespace CassetteClient {
         }
 
         public static void time () {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_file == null) {
                 return;
             }
-
+            
             if (instance.log_level <= LogLevel.DEBUG_SOUP) {
                 write_to_file ("*TIME*  ", "\n\n");
             }
         }
 
         public static void net_in (Soup.LoggerLogLevel log_level, string data) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.DEBUG_SOUP) {
                 if (log_level == Soup.LoggerLogLevel.BODY && data != "") {
                     write_net_to_file ("*BODY* <\n", data);
@@ -120,10 +104,6 @@ namespace CassetteClient {
         }
 
         public static void net_out (Soup.LoggerLogLevel log_level, string data) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.DEBUG_SOUP) {
                 if (log_level == Soup.LoggerLogLevel.BODY && data != "") {
                     write_net_to_file ("*BODY* <\n", data);
@@ -134,30 +114,18 @@ namespace CassetteClient {
         }
 
         public static void debug (string message) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.DEBUG) {
                 write_to_file ("*DEBUG*  ", message);
             }
         }
 
         public static void info (string message) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.INFO) {
                 write_to_file ("*INFO*   ", message);
             }
         }
 
         public static void warning (string message) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.WARNING) {
                 write_to_file ("*WARNING*", message);
                 GLib.warning (message);
@@ -165,10 +133,6 @@ namespace CassetteClient {
         }
 
         public static void error (string message) {
-            if (instance == null) {
-                return;
-            }
-
             if (instance.log_level <= LogLevel.ERROR) {
                 write_to_file ("*ERROR*  ", message);
                 GLib.error (message);

@@ -23,19 +23,19 @@ using CassetteClient;
 
 
 namespace Cassette {
-
+    
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/disliked_tracks_view.ui")]
     public class DislikedTracksView : HasTracksView {
         [GtkChild]
-        unowned Gtk.Box main_box;
+        private unowned Gtk.Box main_box;
         [GtkChild]
-        unowned Gtk.ScrolledWindow scrolled_window;
+        private unowned Gtk.ScrolledWindow scrolled_window;
 
         public override bool can_refresh { get; default = true; }
 
         public override RootView root_view { get; set; }
 
-        YaMAPI.TrackHeap? _track_list = null;
+        private YaMAPI.TrackHeap? _track_list = null;
 
         public string? uid { get; construct set; }
         public string kind { get; construct set; }

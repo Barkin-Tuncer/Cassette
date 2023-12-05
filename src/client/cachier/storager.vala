@@ -20,6 +20,7 @@
 
 namespace CassetteClient.Cachier {
 
+    //  Имена файлов и директорий для сохранения
     namespace Filenames {
         public const string COOKIES = "cassette.cookies";
         public const string LOG = "cassette.log";
@@ -29,18 +30,13 @@ namespace CassetteClient.Cachier {
         public const string OBJECTS = "objs";
     }
 
-
     public struct HumanitySize {
         public string size;
         public string unit;
     }
 
-
+    // Удобный формат вывода о расположении объекта
     public class Location : Object {
-        /*
-            Класс для удобного вывода месторасположения файла
-        */
-
         public bool is_tmp { get; construct; }
         public string? path { get; construct; }
 
@@ -53,10 +49,6 @@ namespace CassetteClient.Cachier {
         }
 
         public async void move_to_temp () {
-            /*
-                Переместить файл во временное хранилище, если он в постоянном
-            */
-
             if (path != null && is_tmp == false) {
                 threader.add (() => {
                     if (storager.settings.get_boolean ("can-cache")) {
@@ -73,34 +65,30 @@ namespace CassetteClient.Cachier {
         }
 
         public async void move_to_perm () {
-            /*
-                Переместить файл в постоянное хранилище, если он во временном
-            */
-
             if (path != null && is_tmp == true) {
                 threader.add (() => {
                     storager.move (path, null, false);
                     Idle.add (move_to_perm.callback);
                 });
-
+                
                 yield;
             }
         }
     }
 
+    // Класс для взаимодействия с файлами
     public class Storager : Object {
-        /*
-            Класс для работы с файлами клиента
-        */
 
+        //  База данных объектов ямы
         public InfoDB db { get; private set; }
         public Settings settings { get; default = new Settings("com.github.Rirusha.Cassette"); }
 
         public signal void moving_done ();
 
-        string old_cache_path;
+        // Расположение кэшей
+        private string old_cache_path;
 
-        string _cache_path;
+        private string _cache_path;
         public string cache_path {
             get { return _cache_path; }
             set {
@@ -134,20 +122,19 @@ namespace CassetteClient.Cachier {
             }
         }
 
-        string home_dir = Environment.get_home_dir();
-        string temp_dir;
+        // Расположение дополнительных директорий
+        private string home_dir = Environment.get_home_dir();
+        private string temp_dir;
         public string log_file_path { get; private set; }
         public string cookies_file_path { get; private set; }
         public string db_file_path { get; private set; }
-        string temp_track_path;
-        string temp_track_uri;
+        private string temp_track_path;
+        private string temp_track_uri;
 
         public string temp_cache_path { get; private set; }
 
-        public bool is_devel { get; construct; }
-
-        public Storager (bool is_devel) {
-            Object (is_devel: is_devel);
+        public Storager () {
+            Object ();
         }
 
         construct {
@@ -167,14 +154,10 @@ namespace CassetteClient.Cachier {
             init_db ();
         }
 
-        void init_log () {
-            /*
-                Инициализировать файл логов. Удаляет файл лога при каждом выполнении
-            */
-
+        private void init_log () {
             FileUtils.remove (log_file_path);
 
-            if (is_devel) {
+            if (Config.POSTFIX == ".Devel") {
                 new Logger (log_file_path, LogLevel.DEBUG_SOUP);
             } else {
                 new Logger (log_file_path, LogLevel.WARNING);
@@ -183,21 +166,14 @@ namespace CassetteClient.Cachier {
             Logger.info (_("Log created, loc - %s").printf (Logger.instance.log_path));
         }
 
-        void init_db () {
-            /*
-                Инициализировать файл логов. Удаляет файл лога при каждом выполнении
-            */
-
+        private void init_db () {
             db = new InfoDB (db_file_path);
-
+            
             Logger.info (_("Database was initialized, loc - %s").printf (db.db_path));
         }
 
+        //  Перемещает что-нибудь, 
         public void move (string src, owned string? dst = null, bool to_tmp = false) {
-            /*
-                Перемещает файл
-            */
-
             if (dst == null) {
                 if (to_tmp) {
                     var b = src.split ("/cassette/");
@@ -217,17 +193,13 @@ namespace CassetteClient.Cachier {
         }
 
         void move_dir (string src_dir, string dst_dir) {
-            /*
-                Перемещает директорию рекурсивно
-            */
-
             try {
                 FileEnumerator? enumerator = File.new_for_path (src_dir).enumerate_children (
                     "standard::*",
                     FileQueryInfoFlags.NONE,
                     null
                 );
-
+            
                 if (enumerator != null) {
                     FileInfo? file_info = null;
 
@@ -235,7 +207,7 @@ namespace CassetteClient.Cachier {
                         string file_name = file_info.get_name ();
                         string src_file_path = Path.build_filename (src_dir, file_name);
                         string dst_file_path = Path.build_filename (dst_dir, file_name);
-
+            
                         if (file_info.get_file_type () == FileType.DIRECTORY) {
                             move_dir(src_file_path, dst_file_path);
                         } else {
@@ -251,35 +223,24 @@ namespace CassetteClient.Cachier {
             } catch (Error e) {
                 Logger.warning (_("Can't move directory. Message: %s").printf (e.message));
             }
-        }
-
-        public void remove_file (string file_path) {
-            /*
-                Удалить файл
-            */
-
-            FileUtils.remove (file_path);
+            
         }
 
         void remove_dir (string dir) {
-            /*
-                Удаляет директорию рекурсивно
-            */
-
             try {
                 FileEnumerator? enumerator = File.new_for_path (dir).enumerate_children (
                     "standard::*",
                     FileQueryInfoFlags.NONE,
                     null
                 );
-
+            
                 if (enumerator != null) {
                     FileInfo? file_info = null;
 
                     while ((file_info = enumerator.next_file ()) != null) {
                         string file_name = file_info.get_name ();
                         string file_path = Path.build_filename (dir, file_name);
-
+            
                         if (file_info.get_file_type () == FileType.DIRECTORY) {
                             remove_dir(file_name);
                         } else {
@@ -295,15 +256,10 @@ namespace CassetteClient.Cachier {
             } catch (Error e) {
                 Logger.warning (_("Can't move directory. Message: %s").printf (e.message));
             }
-
+            
         }
 
         public void clear_user () {
-            /*
-                Удаляет пользовательские данные и переносить содержимое
-                кэшей во временное 
-            */
-
             move_dir (get_path (Filenames.OBJECTS, false), get_path (Filenames.OBJECTS, true));
             move_dir (get_path (Filenames.TRACKS, false), get_path (Filenames.TRACKS, true));
             move_dir (get_path (Filenames.IMAGES, false), get_path (Filenames.IMAGES, true));
@@ -314,10 +270,6 @@ namespace CassetteClient.Cachier {
         }
 
         public async void delete_temp_cache () {
-            /*
-                Удаляет временные файлы
-            */
-
             threader.add (() => {
                 remove_dir (get_path (Filenames.OBJECTS, true));
                 remove_dir (get_path (Filenames.TRACKS, true));
@@ -329,11 +281,8 @@ namespace CassetteClient.Cachier {
             yield;
         }
 
-        string get_path (string filename, bool is_tmp) {
-            /*
-                Даёт путь и создает директории при необходимости
-            */
-
+        // Даёт путь и создает директории при необходимости
+        private string get_path (string filename, bool is_tmp) {
             File path_file;
             if (is_tmp) {
                 path_file = File.new_build_filename (temp_cache_path, filename);
@@ -351,21 +300,18 @@ namespace CassetteClient.Cachier {
             return path_file.get_path ();
         }
 
-        void dencode (ref uint8[] data) {
-            /*
-                "Перевернуть" данные (допустим закодировал)
-            */
+        public void remove_file (string file_path) {
+            FileUtils.remove (file_path);
+        }
 
+        //  "Перевернуть" данные (допустим закодировал)
+        private void dencode (ref uint8[] data) {
             for (int i = 0; i < data.length; i++) {
                 data[i] = data[i] ^ 0xFF;
             }
         }
 
-        string dencode_name (string name) {
-            /*
-                Закодировать имя в Base64
-            */
-
+        private string dencode_name (string name) {
             return Base64.encode (name.data).replace ("/", "=");
         }
 
@@ -373,11 +319,8 @@ namespace CassetteClient.Cachier {
         // Cookies  //
         //////////////
 
+        // Проверка существования файла куки
         public bool cookies_exists () {
-            /*
-                Проверка существования файла куки
-            */
-
             var cookie_file = File.new_for_path (cookies_file_path);
             return cookie_file.query_exists ();
         }
@@ -386,11 +329,7 @@ namespace CassetteClient.Cachier {
         // Images  //
         /////////////
 
-        File get_image_cache_file (string image_uri, bool is_tmp) {
-            /*
-                Получение файла кэширования изображения по его uri
-            */
-
+        private File get_image_cache_file (string image_uri, bool is_tmp) {
             string imagedir_path = get_path (Filenames.IMAGES, is_tmp);
             string image_name = dencode_name (image_uri);
             return File.new_build_filename (imagedir_path, image_name);
@@ -414,7 +353,7 @@ namespace CassetteClient.Cachier {
             if (image_location.path == null) {
                 return null;
             }
-
+            
             while (true) {
                 try {
                     uint8[] idata;
@@ -449,7 +388,7 @@ namespace CassetteClient.Cachier {
         // Tracks  //
         /////////////
 
-        File get_track_cache_file (string track_id, bool is_tmp) {
+        private File get_track_cache_file (string track_id, bool is_tmp) {
             string trackdir_path = get_path (Filenames.TRACKS, is_tmp);
             string track_name = dencode_name (track_id);
             return File.new_build_filename (trackdir_path, track_name);
@@ -510,11 +449,11 @@ namespace CassetteClient.Cachier {
         //  Objects  //
         ///////////////
 
-        string build_id (Type build_type, string oid) {
+        private string build_id (Type build_type, string oid) {
             return build_type.name () + "/" + oid;
         }
 
-        File get_object_cache_file (Type obj_type, string oid, bool is_tmp) {
+        private File get_object_cache_file (Type obj_type, string oid, bool is_tmp) {
             string objdir_path = get_path (Filenames.OBJECTS, is_tmp);
             string object_name = dencode_name (build_id (obj_type, oid));
             return File.new_build_filename (objdir_path, object_name);
@@ -602,10 +541,10 @@ namespace CassetteClient.Cachier {
             threader.add (() => {
                 try {
                     Process.spawn_command_line_sync ("du -sh %s --exclude=\"*.log\"".printf (storager.temp_cache_path), out size);
-
+  
                     Regex regex = null;
                     regex = new Regex ("^[\\d.,]+[A-Z]", RegexCompileFlags.OPTIMIZE, RegexMatchFlags.NOTEMPTY);
-
+                    
                     MatchInfo match_info;
                     if (regex.match (size, 0, out match_info)) {
                         size = match_info.fetch (0);
@@ -635,10 +574,10 @@ namespace CassetteClient.Cachier {
             threader.add (() => {
                 try {
                     Process.spawn_command_line_sync ("du -sh %s --exclude=\"*.db\" --exclude=\"*.cookies\"".printf (storager.cache_path), out size);
-
+                
                     Regex regex = null;
                     regex = new Regex ("^[\\d.,]+[A-Z]", RegexCompileFlags.OPTIMIZE, RegexMatchFlags.NOTEMPTY);
-
+                    
                     MatchInfo match_info;
                     if (regex.match (size, 0, out match_info)) {
                         size = match_info.fetch (0);
