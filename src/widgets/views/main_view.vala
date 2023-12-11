@@ -21,8 +21,6 @@
 namespace Cassette {
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/main_view.ui")]
     public class MainView : BaseView {
-        [GtkChild]
-        unowned Adw.StatusPage status_page;
 
         public override bool can_refresh { get; default = false; }
 
@@ -30,12 +28,6 @@ namespace Cassette {
 
         public MainView () {
             Object ();
-        }
-
-        construct {
-            if (Config.POSTFIX == ".Devel") {
-                status_page.icon_name = "io.github.Rirusha.Cassette.Devel-symbolic";
-            }
         }
 
         void set_values () {
