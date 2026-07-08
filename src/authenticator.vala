@@ -28,6 +28,7 @@ namespace Cassette {
 
         public signal void success ();
         public signal void local ();
+        public signal void failed ();
 
         Adw.Window? loading_win = null;
 
@@ -131,16 +132,17 @@ namespace Cassette {
                 storager.remove_file (storager.cookies_file_path);
             }
 
-            var begin_window = new BeginWindow () {
-                transient_for = application.main_window
-            };
+            var auth_window = new AuthWindow (application.main_window);
 
-            begin_window.begin_view.local_choosed.connect (() => {
+            auth_window.bad_close.connect (() => {
+                failed ();
+            });
+            auth_window.choosed_local.connect (() => {
                 local ();
             });
-            begin_window.begin_view.online_complete.connect (init_client_async);
+            auth_window.complete.connect (init_client_async);
 
-            begin_window.present ();
+            auth_window.present ();
         }
     }
 }

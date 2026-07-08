@@ -20,6 +20,7 @@
 
 
 using CassetteClient;
+using CassetteClient.YaMAuth;
 
 
 namespace Cassette {

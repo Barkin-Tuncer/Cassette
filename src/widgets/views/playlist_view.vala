@@ -95,9 +95,7 @@ namespace Cassette {
             });
             actions.add_action (share_action);
 
-            if (yam_talker.is_me (uid) && kind != "3") {
-                visibility_switch.visible = true;
-
+            if (uid == yam_talker.me.oid && kind != "3") {
                 playlist_options_button.add_delete_playlist_action ();
 
                 var delete_playlist_action = new SimpleAction ("delete-playlist", null);
@@ -162,7 +160,10 @@ namespace Cassette {
 
             play_button.clicked_not_playing.connect (start_playing);
 
-            if (kind != "3" || (uid != null && uid != yam_talker.me.oid)) {
+            if (kind != "3") {
+                if (uid == null || uid == yam_talker.me.oid) {
+                    visibility_switch.visible = true;
+                }
                 add_page_button.visible = true;
                 add_page_button.clicked.connect (() => {
                     var playlist_info = object_info as YaMAPI.Playlist;

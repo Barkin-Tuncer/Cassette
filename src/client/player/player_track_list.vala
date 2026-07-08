@@ -88,33 +88,34 @@ namespace CassetteClient.Player {
             update_queue.begin ();
         }
 
-        public int get_next_index (bool consider_repeat_one) {
+        public int get_next_index (bool consider_repeat_mode) {
             int index = _queue.current_index;
 
-            switch (player.repeat_mode) {
-                case RepeatMode.OFF:
-                    if (index + 1 == _queue.tracks.size) {
-                        // Неразрешимая ситуация
-                    } else {
-                        index++;
-                    }
-                    break;
-                case RepeatMode.REPEAT_ONE:
-                    if (!consider_repeat_one) {
+            if (!consider_repeat_mode) {
+                if (index + 1 == _queue.tracks.size) {
+                    // Неразрешимая ситуация
+                } else {
+                    index++;
+                }
+            } else {
+                switch (player.repeat_mode) {
+                    case RepeatMode.OFF:
                         if (index + 1 == _queue.tracks.size) {
                             // Неразрешимая ситуация
                         } else {
                             index++;
                         }
-                    }
-                    break;
-                case RepeatMode.REPEAT_ALL:
-                    if (index + 1 == _queue.tracks.size) {
-                        index = 0;
-                    } else {
-                        index++;
-                    }
-                    break;
+                        break;
+                    case RepeatMode.REPEAT_ONE:
+                        break;
+                    case RepeatMode.REPEAT_ALL:
+                        if (index + 1 == _queue.tracks.size) {
+                            index = 0;
+                        } else {
+                            index++;
+                        }
+                        break;
+                }
             }
 
             return index;
@@ -127,18 +128,24 @@ namespace CassetteClient.Player {
 
         public int get_prev_index () {
             int index = _queue.current_index;
-
-            if (index - 1 == -1) {
-                if (player.repeat_mode == RepeatMode.REPEAT_ONE || player.repeat_mode == RepeatMode.OFF) {
-                    player.seek (0);
-                } else {
-                    index = _queue.tracks.size - 1;
-                }
-
-            } else {
-                index--;
+            switch (player.repeat_mode) {
+                case RepeatMode.OFF:
+                    if (index - 1 == -1) {
+                        player.seek (0);
+                    } else {
+                        index--;
+                    }
+                    break;
+                case RepeatMode.REPEAT_ONE:
+                    break;
+                case RepeatMode.REPEAT_ALL:
+                    if (index - 1 == -1) {
+                        index = _queue.tracks.size - 1;
+                    } else {
+                        index--;
+                    }
+                    break;
             }
-
             return index;
         }
 
