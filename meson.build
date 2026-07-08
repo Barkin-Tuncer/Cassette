@@ -19,7 +19,6 @@ sqlite3 = dependency('sqlite3')
 gee = dependency('gee-0.8')
 libxml = dependency('libxml-2.0')
 gstreamer = dependency('gstreamer-1.0')
-webkit = dependency('webkitgtk-6.0')
 gio = dependency('gio-2.0', version: '>= 2.72')
 
 cassette_dependencies = [
@@ -34,7 +33,6 @@ cassette_dependencies = [
   libxml,
   gstreamer,
   gio,
-  webkit
 ]
 
 if get_option('profile') == 'development'

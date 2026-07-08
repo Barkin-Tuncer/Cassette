@@ -29,7 +29,7 @@ namespace CassetteClient {
     // Класс для выполнения всяких вещей, связанных с интернетом, чтобы можно было оповестить пользователя о проблемах с соединением
     public class YaMTalker : AbstractTalker {
 
-        private YaMClient client = new YaMClient (create_soup_wrapper (true));
+        public YaMClient client { get; private set; }
         public LikesController likes_controller { get; default = new LikesController (); }
 
         public signal void track_likes_start_change (string track_id);
@@ -82,16 +82,8 @@ namespace CassetteClient {
             }
         }
 
-        public bool is_me (string? uid) {
-            return uid == null || uid == me.oid;
-        }
-
-        public bool is_my_liked (string? uid, string kind) {
-            return is_me (uid) && kind == "3";
-        }
-
         public void init () throws BadStatusCodeError {
-            client.soup_wrapper.reload_cookies (storager.cookies_file_path);
+            client = new YaMClient (create_soup_wrapper (true));
 
             net_run (() => {
                 client.init ();
@@ -115,7 +107,7 @@ namespace CassetteClient {
             net_run (() => {
                 playlist_info = client.get_playlist_info (uid, kind);
 
-                if (is_my_liked (uid, kind)) {
+                if (kind == "3") {
                     likes_controller.update_liked_tracks (playlist_info.tracks);
                 }
 
@@ -208,26 +200,14 @@ namespace CassetteClient {
         }
 
         public void update_position_queue (YaMAPI.Queue queue) {
-            try {
-                net_run (() => {
-                    //  На случай если пользователь после формирования очереди быстро сменит трек и id после создания не успеет придти
-                    if (queue.id == null) {
-                        queue.id = create_queue (queue);
-                    }
-
-                    if (queue.id == null) {
-                        return;
-                    }
-
-                    client.update_position_queue (queue.id, queue.current_index);
-                });
-            } catch (CassetteClient.BadStatusCodeError e) {
-                if (e is CassetteClient.BadStatusCodeError.NOT_FOUND) {
-                    queue.id = null;
-
-                    update_position_queue (queue);
+            net_run_wout_code (() => {
+                //  На случай если пользователь после формирования очереди быстро сменит трек и id после создания не успеет придти
+                if (queue.id == null) {
+                    queue.id = create_queue (queue);
                 }
-            }
+
+                client.update_position_queue (queue.id, queue.current_index);
+            });
         }
 
         public string? get_download_uri (string track_id, bool is_hq) {
