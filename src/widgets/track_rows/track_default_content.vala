@@ -27,29 +27,29 @@ namespace Cassette {
     public class TrackDefault : Gtk.Frame {
 
         [GtkChild]
-        unowned CoverImage cover_image;
+        private unowned CoverImage cover_image;
         [GtkChild]
-        unowned PlayButtonTrack play_button;
+        private unowned PlayButtonTrack play_button;
         [GtkChild]
-        unowned Gtk.Label track_name_label;
+        private unowned Gtk.Label track_name_label;
         [GtkChild]
-        unowned Gtk.Label track_version_label;
+        private unowned Gtk.Label track_version_label;
         [GtkChild]
-        unowned InfoMarks info_marks;
+        private unowned InfoMarks info_marks;
         [GtkChild]
-        unowned Gtk.Label track_authors_label;
+        private unowned Gtk.Label track_authors_label;
         [GtkChild]
-        unowned SaveStack save_stack;
+        private unowned SaveStack save_stack;
         [GtkChild]
-        unowned LikeButton like_button;
+        private unowned LikeButton like_button;
         [GtkChild]
-        unowned DislikeButton dislike_button;
+        private unowned DislikeButton dislike_button;
         [GtkChild]
-        unowned Gtk.Revealer dislike_button_revealer;
+        private unowned Gtk.Revealer dislike_button_revealer;
         [GtkChild]
-        unowned Gtk.Label duration_label;
+        private unowned Gtk.Label duration_label;
         [GtkChild]
-        unowned TrackOptionsButton track_options_button;
+        private unowned TrackOptionsButton track_options_button;
 
         public YaMAPI.Track track_info { get; construct set; }
         public HasTrackList yam_object { get; construct set; }
@@ -173,7 +173,7 @@ namespace Cassette {
             track_authors_label.label = track_info.get_artists_names ();
             track_authors_label.tooltip_text = track_info.get_artists_names ();
             if (track_info.available) {
-                duration_label.label = ms2str (track_info.duration_ms, true);
+                duration_label.label = Utils.ms2str (track_info.duration_ms, true);
                 motion_controller.enter.connect ((mc, x, y) => {
                     play_button.visible = true;
                 });
@@ -196,14 +196,14 @@ namespace Cassette {
             like_button.init_content (track_info.id);
             dislike_button.init_content (track_info.id);
             play_button.init_content (track_info.id);
-            cover_image.init_content (track_info, TRACK_ART_SIZE);
-
+            cover_image.init_content (track_info, Utils.TRACK_ART_SIZE);
+    
             cover_image.load_image.begin ();
 
             save_stack.init_content (track_info.id);
         }
 
-        void form_queue () {
+        private void form_queue () {
             var track_list = yam_object.get_filtered_track_list (
                 storager.settings.get_boolean ("explicit-visible"),
                 storager.settings.get_boolean ("child-visible"),

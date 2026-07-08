@@ -27,35 +27,35 @@ namespace Cassette {
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/preferences_window.ui")]
     public class PreferencesWindow : Adw.PreferencesWindow {
         [GtkChild]
-        unowned Adw.SwitchRow show_save_stack_switch;
+        private unowned Adw.SwitchRow show_save_stack_switch;
         [GtkChild]
-        unowned Adw.SwitchRow show_temp_save_stack_switch;
+        private unowned Adw.SwitchRow show_temp_save_stack_switch;
         [GtkChild]
-        unowned Adw.SwitchRow is_hq_switch;
+        private unowned Adw.SwitchRow is_hq_switch;
         [GtkChild]
-        unowned Adw.SwitchRow child_visible_switch;
+        private unowned Adw.SwitchRow child_visible_switch;
         [GtkChild]
-        unowned Adw.SwitchRow explicit_visible_switch;
+        private unowned Adw.SwitchRow explicit_visible_switch;
         [GtkChild]
-        unowned Adw.SwitchRow show_replaced_mark_switch;
+        private unowned Adw.SwitchRow show_replaced_mark_switch;
         [GtkChild]
-        unowned Adw.SwitchRow available_visible_switch;
+        private unowned Adw.SwitchRow available_visible_switch;
         [GtkChild]
-        unowned Adw.SwitchRow add_tracks_to_start_switch;
+        private unowned Adw.SwitchRow add_tracks_to_start_switch;
         [GtkChild]
-        unowned Adw.SwitchRow show_main_switch;
+        private unowned Adw.SwitchRow show_main_switch;
         [GtkChild]
-        unowned Adw.SwitchRow show_liked_switch;
+        private unowned Adw.SwitchRow show_liked_switch;
         [GtkChild]
-        unowned Adw.SwitchRow show_playlists_switch;
+        private unowned Adw.SwitchRow show_playlists_switch;
         [GtkChild]
-        unowned Adw.SwitchRow can_cache_switch;
+        private unowned Adw.SwitchRow can_cache_switch;
         [GtkChild]
-        unowned Adw.SwitchRow try_load_queue_every_activate_switch;
+        private unowned Adw.SwitchRow try_load_queue_every_activate_switch;
         [GtkChild]
-        unowned Adw.SpinRow max_thread_number_spin;
+        private unowned Adw.SpinRow max_thread_number_spin;
         [GtkChild]
-        unowned CacheDeletionPreferences deletion_preferences;
+        private unowned CacheDeletionPreferences deletion_preferences;
 
         construct {
             deletion_preferences.pref_win = this;
@@ -75,11 +75,11 @@ namespace Cassette {
             storager.settings.bind ("show-temp-save-mark", show_temp_save_stack_switch, "active", GLib.SettingsBindFlags.DEFAULT);
             storager.settings.bind ("is-hq", is_hq_switch, "active", GLib.SettingsBindFlags.DEFAULT);
             storager.settings.bind ("try-load-queue-every-activate", try_load_queue_every_activate_switch, "active", GLib.SettingsBindFlags.DEFAULT);
-
+         
             storager.settings.bind ("show-main", show_main_switch, "active", GLib.SettingsBindFlags.DEFAULT);
             storager.settings.bind ("show-liked", show_liked_switch, "active", GLib.SettingsBindFlags.DEFAULT);
             storager.settings.bind ("show-playlists", show_playlists_switch, "active", GLib.SettingsBindFlags.DEFAULT);
-
+            
             max_thread_number_spin.notify["value"].connect (() => {
                 storager.settings.set_int ("max-thread-number", (int) max_thread_number_spin.value);
             });
@@ -104,8 +104,6 @@ namespace Cassette {
         void on_can_cache_switch_changed () {
             if (!can_cache_switch.active) {
                 ask_about_deletion ();
-            } else {
-                storager.settings.set_boolean ("can-cache", true);
             }
         }
 
@@ -128,7 +126,6 @@ namespace Cassette {
             dialog.response.connect ((dialog, response) => {
                 if (response == "delete") {
                     deletion_preferences.delete_temp_cache ();
-                    storager.settings.set_boolean ("can-cache", can_cache_switch.active);
                 } else {
                     can_cache_switch.active = true;
                 }

@@ -54,7 +54,6 @@ namespace Cassette {
             dialog.response.connect ((dialog, response) => {
                 if (response == "logout") {
                     move_cache ();
-                    application.application_state = ApplicationState.BEGIN;
                 }
             });
 

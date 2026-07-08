@@ -23,7 +23,7 @@ namespace CassetteClient {
     public delegate void ThreadFunc (Value[]? func_args);
     //  public delegate void SourceFunc ();
 
-  class ThreadInfo {
+    private class ThreadInfo {
 
         public weak ThreadFunc func;
         public Value[]? func_args;  //  Список чего-либо, в котором хрянится что-либо для сохранения от непредвиденного освобождения
@@ -38,14 +38,14 @@ namespace CassetteClient {
         }
     }
 
-  class WorkManager : Object {
+    private class WorkManager : Object {
 
         AsyncQueue<ThreadInfo> thread_datas = new AsyncQueue<ThreadInfo> ();
 
-        Mutex mutex = Mutex ();
-        Cond cond = Cond ();
+        private Mutex mutex = Mutex ();
+        private Cond cond = Cond ();
 
-        int running_jobs_count = 0;
+        private int running_jobs_count = 0;
         public int max_running_jobs { get; construct; }
 
         public WorkManager (int max_running_jobs) {
@@ -56,29 +56,29 @@ namespace CassetteClient {
             new Thread<void> (null, work);
         }
 
-        void work () {
+        private void work () {
             while (true) {
                 mutex.lock ();
-
+    
                 if (running_jobs_count >= 10) {
                     cond.wait (mutex);
                 }
-
+    
                 lock (running_jobs_count) {
                     running_jobs_count++;
                 }
-
+    
                 new Thread<void> (null, () => {
                     var worker = thread_datas.pop ();
                     worker.run ();
-
+    
                     lock (running_jobs_count) {
                         running_jobs_count--;
                     }
-
+    
                     cond.signal ();
                 });
-
+    
                 mutex.unlock ();
             }
         }
@@ -92,13 +92,13 @@ namespace CassetteClient {
     public class Threader : Object {
 
         //  Стандартный пул потоков
-        WorkManager default_pool;
+        private WorkManager default_pool;
         //  Пул потоков для задач кэширования
-        WorkManager image_pool;
+        private WorkManager image_pool;
         //  Пул потоков для важных задач, так как первые два могут быть заполнены
-        WorkManager audio_pool;
+        private WorkManager audio_pool;
         //  Пул потоков для задач, выполнение которых не должно пересекаться (размер - 1)
-        WorkManager single_pool;
+        private WorkManager single_pool;
 
         construct {
             int max_size = storager.settings.get_int("max-thread-number");

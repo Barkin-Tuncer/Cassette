@@ -27,43 +27,43 @@ namespace Cassette {
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/track_detailed.ui")]
     public class TrackDetailed : Adw.Bin {
         [GtkChild]
-        unowned Gtk.Label track_name_label;
+        private unowned Gtk.Label track_name_label;
         [GtkChild]
-        unowned Gtk.Label track_version_label;
+        private unowned Gtk.Label track_version_label;
         [GtkChild]
-        unowned Adw.Bin album_socket;
+        private unowned Adw.Bin album_socket;
         [GtkChild]
-        unowned Gtk.FlowBox artists_box;
+        private unowned Gtk.FlowBox artists_box;
         [GtkChild]
-        unowned Gtk.Label ugc_mark;
+        private unowned Gtk.Label ugc_mark;
         [GtkChild]
-        unowned LyricsPanel lyrics_panel;
+        private unowned LyricsPanel lyrics_panel;
         [GtkChild]
-        unowned Gtk.Label writers_label;
+        private unowned Gtk.Label writers_label;
         [GtkChild]
-        unowned Gtk.Label major_label;
+        private unowned Gtk.Label major_label;
         [GtkChild]
-        unowned Gtk.Spinner spin;
+        private unowned Gtk.Spinner spin;
         [GtkChild]
-        unowned Gtk.Stack loading_stack;
+        private unowned Gtk.Stack loading_stack;
         [GtkChild]
-        unowned Gtk.Box add_box;
+        private unowned Gtk.Box add_box;
         [GtkChild]
-        unowned Gtk.Box lyrics_box;
+        private unowned Gtk.Box lyrics_box;
         [GtkChild]
-        unowned Gtk.Box similar_box;
+        private unowned Gtk.Box similar_box;
         [GtkChild]
-        unowned PlayButtonTrack play_button;
+        private unowned PlayButtonTrack play_button;
         [GtkChild]
-        unowned SaveStack save_stack;
+        private unowned SaveStack save_stack;
         [GtkChild]
-        unowned LikeButton like_button;
+        private unowned LikeButton like_button;
         [GtkChild]
-        unowned DislikeButton dislike_button;
+        private unowned DislikeButton dislike_button;
         [GtkChild]
-        unowned Gtk.Box album_box;
+        private unowned Gtk.Box album_box;
         [GtkChild]
-        unowned Gtk.Box artists_main_box;
+        private unowned Gtk.Box artists_main_box;
 
         public YaMAPI.Track track_info { get; construct set; }
 
@@ -199,7 +199,7 @@ namespace Cassette {
             } else {
                 lyrics_box.visible = false;
             }
-
+            
             if (similar_tracks != null) {
                 if (similar_tracks.similar_tracks.size != 0) {
                     var track_list = new TrackList.simple ();
@@ -215,7 +215,7 @@ namespace Cassette {
             loading_stack.visible_child_name = "loaded";
         }
 
-        void play_pause () {
+        private void play_pause () {
             var track_list = new Gee.ArrayList<YaMAPI.Track> ();
             track_list.add (track_info);
 

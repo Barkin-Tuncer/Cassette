@@ -24,13 +24,13 @@ using CassetteClient;
 
 namespace Cassette {
     [GtkTemplate (ui = "/com/github/Rirusha/Cassette/ui/playlist_choose_window.ui")]
-    public class PlaylistChooseWindow : Adw.Window {
+    public class PlaylistChooseWindow : Gtk.Window {
         [GtkChild]
-        unowned Gtk.Box main_box;
+        private unowned Gtk.Box main_box;
         [GtkChild]
-        unowned Gtk.Spinner spinner_loading;
+        private unowned Gtk.Spinner spinner_loading;
         [GtkChild]
-        unowned Gtk.Stack main_stack;
+        private unowned Gtk.Stack main_stack;
 
         public YaMAPI.Track target_track { get; construct; }
 
@@ -47,7 +47,7 @@ namespace Cassette {
             if (Config.POSTFIX == ".Devel") {
                 add_css_class ("devel");
             }
-
+    
         }
 
         async void load_playlists () {

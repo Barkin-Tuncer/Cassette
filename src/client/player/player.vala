@@ -44,18 +44,18 @@ namespace CassetteClient.Player {
         public abstract YaMAPI.Track? current_track { owned get; }
         public abstract YaMAPI.Track next_track { owned get; }
         public abstract YaMAPI.Track prev_track { owned get; }
-        public abstract void next (bool consider_repeat_mode);
+        public abstract void next ();
         public abstract void prev ();
     }
 
     public class Player : Object {
 
-        const double PLAY_STEP = 0.05;
+        private const double PLAY_STEP = 0.05;
 
         public signal void queue_changed ();
         public signal void track_state_changed (string track_id);
 
-        PlayerState _player_state = PlayerState.NONE;
+        private PlayerState _player_state = PlayerState.NONE;
         public PlayerState player_state {
             get {
                 return _player_state;
@@ -76,7 +76,7 @@ namespace CassetteClient.Player {
                 }
             }
         }
-        RepeatMode _repeat_mode = RepeatMode.OFF;
+        private RepeatMode _repeat_mode = RepeatMode.OFF;
         public RepeatMode repeat_mode {
             get {
                 return _repeat_mode;
@@ -89,7 +89,7 @@ namespace CassetteClient.Player {
                 assert (player_mod is PlayerTL);
             }
         }
-        ShuffleMode _shuffle_mode = ShuffleMode.OFF;
+        private ShuffleMode _shuffle_mode = ShuffleMode.OFF;
         public ShuffleMode shuffle_mode {
             get {
                 return _shuffle_mode;
@@ -152,9 +152,9 @@ namespace CassetteClient.Player {
         public bool is_loading          { get; private set; default = false; }
         public IPlayerMod? player_mod   { get; private set; default = null; }
 
-        Gst.Pipeline pipeline;
-        Gst.Element source;
-        Gst.Element _volume;
+        private Gst.Pipeline pipeline;
+        private Gst.Element source;
+        private Gst.Element _volume;
 
         public Player () {
             Object ();
@@ -186,7 +186,7 @@ namespace CassetteClient.Player {
 
             bus.add_signal_watch ();
             bus.message["eos"].connect ((bus, message) => {
-                next_repeat ();
+                next ();
             });
 
             storager.settings.bind ("repeat-mode", this, "repeat-mode", SettingsBindFlags.DEFAULT);
@@ -200,7 +200,7 @@ namespace CassetteClient.Player {
             });
         }
 
-        void init (string[]? args) {
+        private void init (string[]? args) {
             Gst.init (ref args);
         }
 
@@ -277,17 +277,10 @@ namespace CassetteClient.Player {
             play_slider.set_value (0.0);
         }
 
-        void next_repeat () {
-            stop ();
-
-            player_mod.next (true);
-            start_current_track.begin ();
-        }
-
         public void next () {
             stop ();
 
-            player_mod.next (false);
+            player_mod.next ();
             start_current_track.begin ();
         }
 
@@ -365,7 +358,7 @@ namespace CassetteClient.Player {
             });
 
             yield;
-
+            
             if (next_track != current_track) {
                 save_track.begin (next_track);
             }

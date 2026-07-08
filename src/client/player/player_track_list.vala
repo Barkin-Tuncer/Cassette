@@ -25,7 +25,7 @@ using Gee;
 namespace CassetteClient.Player {
     public class PlayerTL: Object, IPlayerMod {
 
-        YaMAPI.Queue _queue;
+        private YaMAPI.Queue _queue;
         public YaMAPI.Queue queue {
             get {
                 return _queue;
@@ -33,8 +33,13 @@ namespace CassetteClient.Player {
             set {
                 _queue = value;
 
+                var track_list = _queue.tracks;
+
                 original_tracks.clear ();
-                original_tracks.add_all (_queue.tracks);
+                original_tracks.add_all (track_list[_queue.current_index:track_list.size]);
+                original_tracks.add_all (track_list[0:_queue.current_index]);
+
+                _queue.current_index = 0;
 
                 _queue.tracks.clear ();
                 _queue.tracks.add_all (original_tracks);
@@ -48,7 +53,7 @@ namespace CassetteClient.Player {
             }
         }
 
-        ArrayList<Track> original_tracks = new ArrayList<Track> ();
+        private ArrayList<Track> original_tracks = new ArrayList<Track> ();
 
         public Track? current_track {
             owned get {
@@ -57,7 +62,7 @@ namespace CassetteClient.Player {
                         _queue.current_index = 0;
                         Logger.warning (_("Problems with queue"));
                     }
-
+    
                     return _queue.tracks[_queue.current_index];
                 } else {
                     return null;
@@ -67,7 +72,7 @@ namespace CassetteClient.Player {
 
         public Track next_track {
             owned get {
-                return _queue.tracks[get_next_index (true)];
+                return _queue.tracks[get_next_index ()];
             }
         }
 
@@ -83,41 +88,31 @@ namespace CassetteClient.Player {
             Object (player: player);
         }
 
-        public void next (bool consider_repeat_mode) {
-            _queue.current_index = get_next_index (consider_repeat_mode);
+        public void next () {
+            _queue.current_index = get_next_index ();
             update_queue.begin ();
         }
 
-        public int get_next_index (bool consider_repeat_mode) {
+        public int get_next_index () {
             int index = _queue.current_index;
-
-            if (!consider_repeat_mode) {
-                if (index + 1 == _queue.tracks.size) {
-                    // Неразрешимая ситуация
-                } else {
-                    index++;
-                }
-            } else {
-                switch (player.repeat_mode) {
-                    case RepeatMode.OFF:
-                        if (index + 1 == _queue.tracks.size) {
-                            // Неразрешимая ситуация
-                        } else {
-                            index++;
-                        }
-                        break;
-                    case RepeatMode.REPEAT_ONE:
-                        break;
-                    case RepeatMode.REPEAT_ALL:
-                        if (index + 1 == _queue.tracks.size) {
-                            index = 0;
-                        } else {
-                            index++;
-                        }
-                        break;
-                }
+            switch (player.repeat_mode) {
+                case RepeatMode.OFF:
+                    if (index + 1 == _queue.tracks.size) {
+                        // Неразрешимая ситуация
+                    } else {
+                        index++;
+                    }
+                    break;
+                case RepeatMode.REPEAT_ONE:
+                    break;
+                case RepeatMode.REPEAT_ALL:
+                    if (index + 1 == _queue.tracks.size) {
+                        index = 0;
+                    } else {
+                        index++;
+                    }
+                    break;
             }
-            
             return index;
         }
 
@@ -160,21 +155,16 @@ namespace CassetteClient.Player {
             return false;
         }
 
-        void shuffle_without_emmit () {
-            var type_utils = new TypeUtils<Track> ();
+        private void shuffle_without_emmit () {
+            var type_utils = new Utils.TypeUtils<Track> ();
 
             var track = current_track;
 
             ArrayList<Track> track_list = _queue.tracks;
             type_utils.shuffle (ref track_list);
 
-            var new_index = track_list.index_of (track);
-
-            _queue.tracks = new ArrayList<YaMAPI.Track> ();
-            _queue.tracks.add_all (track_list[new_index:track_list.size]);
-            _queue.tracks.add_all (track_list[0:new_index]);
-
-            _queue.current_index = 0;
+            _queue.tracks = track_list;
+            _queue.current_index = _queue.tracks.index_of (track);
         }
 
         public void shuffle () {

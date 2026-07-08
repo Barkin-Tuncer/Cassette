@@ -40,7 +40,7 @@ namespace CassetteClient.YaMAPI {
             }
         }
 
-        string _title;
+        private string _title;
         public string title {
             get {
                 return _title;
